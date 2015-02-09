@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `Language` type in crate `austenite`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, Language">
+    <meta name="description" content="API documentation for the Rust `ResourceResult` type in crate `austenite`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ResourceResult">
 
-    <title>austenite::hyper_headers::Language - Rust</title>
+    <title>austenite::resource::ResourceResult - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>austenite</a>::<wbr><a href='index.html'>hyper_headers</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.AcceptCharset.html' title='The `Accept-Charset` header'>AcceptCharset</a><a class='struct ' href='struct.AcceptLanguage.html' title='The `Accept-Language` header'>AcceptLanguage</a><a class='struct ' href='struct.IfMatch.html' title='The `If-Match` header'>IfMatch</a><a class='struct ' href='struct.IfNoneMatch.html' title='The `If-None-Match` header field.'>IfNoneMatch</a></div><div class='block enum'><h2>Enums</h2><a class='enum ' href='enum.EntityTagMatch.html' title='A match for an entity tag'>EntityTagMatch</a></div>
+        <p class='location'><a href='../index.html'>austenite</a>::<wbr><a href='index.html'>resource</a></p><div class='block enum'><h2>Enums</h2><a class='enum ' href='enum.ResourceError.html' title='Austenite&#39;s Error Type'>ResourceError</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.Resource.html' title='Main trait for an HTTP resource.'>Resource</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.handle.html' title='Handler for a resource'>handle</a></div>
     </section>
 
     <nav class="sub">
@@ -41,11 +41,11 @@
     </nav>
 
     <section id='main' class="content type">
-<h1 class='fqn'><span class='in-band'><a href='../index.html'>austenite</a>::<wbr><a href='index.html'>hyper_headers</a>::<wbr><a class='type' href=''>Language</a><wbr></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'><a href='../index.html'>austenite</a>::<wbr><a href='index.html'>resource</a>::<wbr><a class='type' href=''>ResourceResult</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-535' href='../../src/austenite/hyper_headers.rs.html#21'>[src]</a></span></h1>
-<pre class='rust typedef'>type Language = <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>;</pre><div class='docblock'><p>A languge code</p>
+        </span><a id='src-2447' href='../../src/austenite/resource.rs.html#59'>[src]</a></span></h1>
+<pre class='rust typedef'>type ResourceResult = <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../../austenite/resource/enum.ResourceError.html' title='austenite::resource::ResourceError'>ResourceError</a>&gt;;</pre><div class='docblock'><p>Result type for resource trait functions.</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 
