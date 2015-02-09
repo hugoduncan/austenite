@@ -2,11 +2,14 @@
 
 name = "austenite"
 version = "0.0.1"
+description = "HTTP endpoint library for header processing and content negotiation"
 authors = ["Hugo Duncan <hugo@hugoduncan.org>"]
 repository = "https://github.com/hugoduncan/austenite"
 keywords = ["http", "hyper", "iron", "rest"]
 documentation = "http://hugoduncan.github.io/austenite/austenite/index.html"
 readme = "README.md"
+license = "Apache-2.0"
+license_file = "LICENSE"
 
 [dependencies]
 log = "*"
