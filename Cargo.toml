@@ -1,0 +1,14 @@
+[package]
+
+name = "austenite"
+version = "0.0.1"
+authors = ["Hugo Duncan <hugo@hugoduncan.org>"]
+repository = "https://github.com/hugoduncan/austenite"
+keywords = ["http", "hyper", "iron", "rest"]
+documentation = "http://hugoduncan.github.io/austenite/austenite/index.html"
+
+[dependencies]
+iron = "0.1.6"
+hyper = "*"
+time = "*"
+mime = "*"
