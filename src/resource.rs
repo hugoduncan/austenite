@@ -117,7 +117,7 @@ macro_rules! decision_body {
 /// Implement this trait's optional functions to control how the HTTP
 /// request is handled.
 
-pub trait Resource {
+pub trait Resource : Sync + Send {
     // Trait functions that can be overridden
 
     /// Override to control service availability.  If this returns
@@ -1158,26 +1158,16 @@ pub trait Resource {
         Ok(())
     }
 
-
-}
-
-/// Handler for a resource
-pub fn handle<T>(resource: &T,
-                 req: &mut Request) -> IronResult<Response> where T: Resource {
-    let mut resp = Response::new();
-    try!(resource.service_available_decision(req, &mut resp));
-    Ok(resp)
+    /// Iron handler function
+    fn resource_handle(&self, req: &mut Request) -> IronResult<Response> {
+        let mut resp = Response::new();
+        try!(self.service_available_decision(req, &mut resp));
+        Ok(resp)
+    }
 }
 
 fn header_exists<T: headers::Header+headers::HeaderFormat>(req: &Request) -> bool {
     req.headers.get::<T>().is_some()
-}
-
-macro_rules! resource {
-    ($s:ident) => {
-        impl Resource for $s {}
-        resource_handler!($s);
-    }
 }
 
 /// Implement an Iron Handler on a resource
@@ -1186,7 +1176,7 @@ pub macro_rules! resource_handler {
     ($s:ident) => {
         impl ::iron::Handler for $s {
             fn handle(&self, req: &mut Request) -> IronResult<Response> {
-                $crate::resource::handle(self, req)
+                self.resource_handle(req)
             }
         }
     }
@@ -1211,7 +1201,9 @@ mod tests {
     }
 
     struct GetOk;
-    resource!(GetOk);
+    impl Resource for GetOk {}
+    resource_handler!(GetOk);
+    // resource!(GetOk);
 
     #[test]
     fn test_get_ok() {
