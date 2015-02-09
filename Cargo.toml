@@ -6,8 +6,10 @@ authors = ["Hugo Duncan <hugo@hugoduncan.org>"]
 repository = "https://github.com/hugoduncan/austenite"
 keywords = ["http", "hyper", "iron", "rest"]
 documentation = "http://hugoduncan.github.io/austenite/austenite/index.html"
+readme = "README.md"
 
 [dependencies]
+log = "*"
 iron = "0.1.6"
 hyper = "*"
 time = "*"

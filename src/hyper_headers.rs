@@ -1,9 +1,9 @@
-use hyper::header::{self, EntityTag, Encoding, QualityItem};
-use hyper::header::parsing::{self, from_one_raw_str, tm_from_str};
-use time::Tm;
+use hyper::header::{self, EntityTag, QualityItem};
+use hyper::header::parsing::{self};
 use std::fmt;
 use std::str::FromStr;
 
+/// A languge code
 pub type Language = String;
 
 /// The `Accept-Language` header
@@ -57,7 +57,7 @@ impl ::std::fmt::Display for AcceptLanguage {
 
 
 
-
+/// A charset code
 pub type Charset = String;
 
 /// The `Accept-Charset` header
@@ -147,9 +147,12 @@ impl ::std::fmt::Display for AcceptCharset {
 //     }
 // }
 
+/// A match for an entity tag
 #[derive(PartialEq, Clone, Debug)]
 pub enum EntityTagMatch{
+    /// A vec of entity tags to match
     EntityTags(Vec<EntityTag>),
+    /// Match any entity
     Star
 }
 
