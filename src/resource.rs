@@ -1323,27 +1323,11 @@ mod tests {
         let address = IpAddr::Ipv4Addr(127,0,0,1);
         let count = Arc::new(Mutex::new(0u8));
         let server_count = count.clone();
-
-        // let f = |req: &mut Request| {
-        //     handle(resource, req).unwrap();
-        // };
-
-        // let g : &::std::ops::Fn((&mut Request)) = &f;
-
-        // let i = Iron::new(resource);
-
         Iron::new(resource).listen((address,0u16))
     }
 
     struct GetOk;
     resource!(GetOk);
-    // impl Resource for GetOk {}
-
-    // impl Handler for GetOk {
-    //     fn handle(&self, req: &mut Request) -> IronResult<Response> {
-    //         super::handle(self, req)
-    //     }
-    // }
 
     #[test]
     fn test_get_ok() {
