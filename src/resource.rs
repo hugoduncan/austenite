@@ -26,7 +26,7 @@ use content_neg;
 use hyper_headers;
 
 /// Austenite's Error Type
-#[derive(Debug)]
+#[derive(Debug,PartialEq,Clone)]
 pub enum ResourceError{
     /// Requested URI is too long
     RequestUriTooLong,
