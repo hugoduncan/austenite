@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `austenite` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, austenite">
+
+    <title>austenite - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'></p>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>austenite</a><wbr></span><span class='out-of-band'><a href='stability.html'>[stability]</a> <span id='render-detail'>
+            <a id="collapse-all" href="#">[-]
+            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-0' href='../src/austenite/lib.rs.html#1-45'>[src]</a></span></h1>
+<div class='docblock'><p>Austenite</p>
+
+<p>A library for building <a href="https://github.com/iron/iron">Iron</a>
+handlers that implements HTTP header handling and content
+negotiation.</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>austenite</span>;
+<span class='kw'>use</span> <span class='ident'>austenite</span>::<span class='ident'>handle</span>;
+<span class='kw'>use</span> <span class='ident'>iron</span>::{<span class='ident'>Iron</span>, <span class='ident'>Listening</span>, <span class='ident'>Request</span>, <span class='ident'>Response</span>};
+
+<span class='kw'>struct</span> <span class='ident'>GetOkContent</span>;
+<span class='macro'>resource_handler</span><span class='macro'>!</span>(<span class='ident'>GetOkContent</span>);
+<span class='kw'>impl</span> <span class='ident'>Resource</span> <span class='kw'>for</span> <span class='ident'>GetOkContent</span> {
+    <span class='kw'>fn</span> <span class='ident'>handle_ok</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>req</span>: <span class='kw-2'>&amp;</span><span class='ident'>Request</span>, <span class='ident'>resp</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Response</span>)
+               <span class='op'>-&gt;</span> <span class='ident'>IronResult</span><span class='op'>&lt;</span><span class='ident'>Response</span><span class='op'>&gt;</span>
+    {
+      <span class='ident'>resp</span>.<span class='ident'>set_mut</span>((<span class='ident'>status</span>::<span class='prelude-val'>Ok</span>, <span class='string'>&quot;hello&quot;</span>));
+      <span class='prelude-val'>Ok</span>(<span class='ident'>Response</span>::<span class='ident'>new</span>())
+    }
+}
+
+<span class='kw'>fn</span> <span class='ident'>start_iron</span>() <span class='op'>-&gt;</span> <span class='ident'>Listening</span> {
+  <span class='ident'>Iron</span>::<span class='ident'>new</span>(<span class='ident'>Resource</span>).<span class='ident'>listen</span>((<span class='ident'>address</span>,<span class='number'>0u16</span>)).<span class='ident'>unwrap</span>();
+}
+</pre>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use <a class='mod' href='../austenite/hyper_headers/index.html' title='austenite::hyper_headers'>hyper_headers</a>::*;</code></td></tr><tr><td><code>pub use resource::<a class='trait' href='../austenite/resource/trait.Resource.html' title='austenite::resource::Resource'>Resource</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='content_neg/index.html'
+                               title='austenite::content_neg'>content_neg</a></td>
+                        <td class='docblock short'><p>Content Negotiation</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='hyper_headers/index.html'
+                               title='austenite::hyper_headers'>hyper_headers</a></td>
+                        <td class='docblock short'><p>Headers</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='resource/index.html'
+                               title='austenite::resource'>resource</a></td>
+                        <td class='docblock short'><p>A Resource</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "austenite";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script async src="../search-index.js"></script>
+</body>
+</html>

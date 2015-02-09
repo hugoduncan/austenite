@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ResourceError` enum in crate `austenite`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ResourceError">
+
+    <title>austenite::resource::ResourceError - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../index.html'>austenite</a>::<wbr><a href='index.html'>resource</a></p><div class='block enum'><h2>Enums</h2><a class='enum current' href='enum.ResourceError.html' title='Austenite&#39;s Error Type'>ResourceError</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.Resource.html' title='Main trait for an HTTP resource.'>Resource</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>austenite</a>::<wbr><a href='index.html'>resource</a>::<wbr><a class='enum' href=''>ResourceError</a><wbr></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]
+            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-2217' href='../../src/austenite/resource.rs.html#16-63'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum ResourceError {
+    RequestUriTooLong,
+    ServiceUnavailable,
+    UnknownMethod,
+    MethodNotAllowed,
+    BadRequest,
+    Unauthorized,
+    Forbidden,
+    NotImplemented,
+    UnsupportedMediaType,
+    RequestEntityTooLarge,
+    NotAcceptable,
+    UnprocessableEntity,
+    PreconditionFailed,
+    NotModified,
+    PermanentRedirect,
+    TemporaryRedirect,
+    Gone,
+    NotFound,
+    NoContent,
+    MultipleChoices,
+    Conflict,
+    Created,
+    SeeOther,
+}</pre><div class='docblock'><p>Austenite&#39;s Error Type</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.RequestUriTooLong'><a class='stability Unmarked' title='No stability level'></a><code>RequestUriTooLong</code></td><td><div class='docblock'><p>Requested URI is too long</p>
+</div></td></tr><tr><td id='variant.ServiceUnavailable'><a class='stability Unmarked' title='No stability level'></a><code>ServiceUnavailable</code></td><td><div class='docblock'><p>Service unavailable</p>
+</div></td></tr><tr><td id='variant.UnknownMethod'><a class='stability Unmarked' title='No stability level'></a><code>UnknownMethod</code></td><td><div class='docblock'><p>Unknown method</p>
+</div></td></tr><tr><td id='variant.MethodNotAllowed'><a class='stability Unmarked' title='No stability level'></a><code>MethodNotAllowed</code></td><td><div class='docblock'><p>Method not allowed</p>
+</div></td></tr><tr><td id='variant.BadRequest'><a class='stability Unmarked' title='No stability level'></a><code>BadRequest</code></td><td><div class='docblock'><p>Bad request</p>
+</div></td></tr><tr><td id='variant.Unauthorized'><a class='stability Unmarked' title='No stability level'></a><code>Unauthorized</code></td><td><div class='docblock'><p>Unauthorized</p>
+</div></td></tr><tr><td id='variant.Forbidden'><a class='stability Unmarked' title='No stability level'></a><code>Forbidden</code></td><td><div class='docblock'><p>Forbidden</p>
+</div></td></tr><tr><td id='variant.NotImplemented'><a class='stability Unmarked' title='No stability level'></a><code>NotImplemented</code></td><td><div class='docblock'><p>Not implemented</p>
+</div></td></tr><tr><td id='variant.UnsupportedMediaType'><a class='stability Unmarked' title='No stability level'></a><code>UnsupportedMediaType</code></td><td><div class='docblock'><p>Unsupported media type</p>
+</div></td></tr><tr><td id='variant.RequestEntityTooLarge'><a class='stability Unmarked' title='No stability level'></a><code>RequestEntityTooLarge</code></td><td><div class='docblock'><p>Request entity too large</p>
+</div></td></tr><tr><td id='variant.NotAcceptable'><a class='stability Unmarked' title='No stability level'></a><code>NotAcceptable</code></td><td><div class='docblock'><p>Nor acceptable</p>
+</div></td></tr><tr><td id='variant.UnprocessableEntity'><a class='stability Unmarked' title='No stability level'></a><code>UnprocessableEntity</code></td><td><div class='docblock'><p>Unprocessable entity</p>
+</div></td></tr><tr><td id='variant.PreconditionFailed'><a class='stability Unmarked' title='No stability level'></a><code>PreconditionFailed</code></td><td><div class='docblock'><p>Precondition failed</p>
+</div></td></tr><tr><td id='variant.NotModified'><a class='stability Unmarked' title='No stability level'></a><code>NotModified</code></td><td><div class='docblock'><p>Not modified</p>
+</div></td></tr><tr><td id='variant.PermanentRedirect'><a class='stability Unmarked' title='No stability level'></a><code>PermanentRedirect</code></td><td><div class='docblock'><p>Permanent redirect</p>
+</div></td></tr><tr><td id='variant.TemporaryRedirect'><a class='stability Unmarked' title='No stability level'></a><code>TemporaryRedirect</code></td><td><div class='docblock'><p>Temporary redirect</p>
+</div></td></tr><tr><td id='variant.Gone'><a class='stability Unmarked' title='No stability level'></a><code>Gone</code></td><td><div class='docblock'><p>Gone</p>
+</div></td></tr><tr><td id='variant.NotFound'><a class='stability Unmarked' title='No stability level'></a><code>NotFound</code></td><td><div class='docblock'><p>Not found</p>
+</div></td></tr><tr><td id='variant.NoContent'><a class='stability Unmarked' title='No stability level'></a><code>NoContent</code></td><td><div class='docblock'><p>No content</p>
+</div></td></tr><tr><td id='variant.MultipleChoices'><a class='stability Unmarked' title='No stability level'></a><code>MultipleChoices</code></td><td><div class='docblock'><p>Multiple choices</p>
+</div></td></tr><tr><td id='variant.Conflict'><a class='stability Unmarked' title='No stability level'></a><code>Conflict</code></td><td><div class='docblock'><p>Conflict</p>
+</div></td></tr><tr><td id='variant.Created'><a class='stability Unmarked' title='No stability level'></a><code>Created</code></td><td><div class='docblock'><p>Created</p>
+</div></td></tr><tr><td id='variant.SeeOther'><a class='stability Unmarked' title='No stability level'></a><code>SeeOther</code></td><td><div class='docblock'><p>Other</p>
+</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='enum' href='../../austenite/resource/enum.ResourceError.html' title='austenite::resource::ResourceError'>ResourceError</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, fmt: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Error.html' title='core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Unstable' title='Unstable: the exact API of this trait may change'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/error/trait.Error.html' title='core::error::Error'>Error</a> for <a class='enum' href='../../austenite/resource/enum.ResourceError.html' title='austenite::resource::ResourceError'>ResourceError</a></code></h3><div class='impl-items'><h4 id='method.description' class='method'><a class='stability Unstable' title='Unstable: the exact API of this trait may change'></a><code>fn <a href='#method.description' class='fnname'>description</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<h4 id='method.cause' class='tymethod'><a class='stability Unstable' title='Unstable: the exact API of this trait may change'></a><code>fn <a href='#tymethod.cause' class='fnname'>cause</a>(&amp;self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='trait' href='http://doc.rust-lang.org/nightly/core/error/trait.Error.html' title='core::error::Error'>Error</a>&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../austenite/resource/enum.ResourceError.html' title='austenite::resource::ResourceError'>ResourceError</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "austenite";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>
