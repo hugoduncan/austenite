@@ -1180,11 +1180,13 @@ macro_rules! resource {
     }
 }
 
-macro_rules! resource_handler {
+/// Implement an Iron Handler on a resource
+#[macro_export]
+pub macro_rules! resource_handler {
     ($s:ident) => {
-        impl Handler for $s {
+        impl ::iron::Handler for $s {
             fn handle(&self, req: &mut Request) -> IronResult<Response> {
-            handle(self, req)
+                $crate::resource::handle(self, req)
             }
         }
     }
