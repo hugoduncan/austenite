@@ -49,7 +49,7 @@ extern crate time;
 #[macro_use] extern crate log;
 
 pub use hyper_headers::*;
-pub use resource::Resource;
+pub use resource::{Resource, ResourceError, ResourceResult};
 
 /// Content Negotiation
 pub mod content_neg;
