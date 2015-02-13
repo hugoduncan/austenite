@@ -6,6 +6,8 @@ handling and content negotiation.
 A port of Clojure's [Liberator][liberator] library, itself inspired by
 Erlang's [webmachine][webmachine].
 
+This is currently experimental code.
+
 ## Install
 
 Add `austenite = "*"` to your `Cargo.toml` dependencies.
