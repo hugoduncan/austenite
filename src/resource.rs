@@ -13,14 +13,15 @@
 // limitations under the License.
 
 /// A module for http resources
+use std::{error,fmt};
+use std::boxed::Box;
+
 use hyper::header::EntityTag;
 use iron::{IronError, IronResult, Request, Response, status};
 use iron::headers::{self, Encoding, QualityItem};
 use iron::method;
 use iron::modifier::Set;
 use mime::{Mime, TopLevel, SubLevel};
-use std::{error,fmt};
-use std::boxed::Box;
 use time::Tm;
 use content_neg;
 use hyper_headers;
@@ -57,6 +58,12 @@ impl error::FromError<ResourceError> for IronError {
         }}
 }
 
+fn internal_error(s: &str) -> (status::Status, Mime, String) {
+    (status::InternalServerError,
+     Mime(TopLevel::Text, SubLevel::Plain, vec![]),
+     s.to_string())
+}
+
 /// Result type for resource trait functions.
 pub type ResourceResult = Result<(),ResourceError>;
 
@@ -74,7 +81,7 @@ fn weak_match(_: &EntityTag, _: &EntityTag) -> bool {
 macro_rules! decision_fn {
     ($decision:ident, $thenv:ident, $elsev:ident) => (
         fn concat_idents!($decision,_decision)
-            (&self, req: &mut Request, resp: &mut Response) -> ResourceResult {
+            (&self, req: &mut Request, mut resp: Response) -> IronResult<Response> {
                 let decision=self.$decision(req);
                 debug!(concat!(stringify!($decision),": {}"), decision);
                 if decsion {
@@ -90,7 +97,7 @@ macro_rules! decision_body {
     ($me:ident, $req:ident, $resp:ident,
      $decision:ident, $thenv:ident, $elsev:ident) => (
         {
-            let decision=$me.$decision($req, $resp);
+            let decision=$me.$decision($req, &mut $resp);
             debug!(concat!(stringify!($decision),": {}"), decision);
             if decision {
                 $me.$thenv($req,$resp)
@@ -305,33 +312,39 @@ pub trait Resource : Sync + Send {
     // Actions
 
     #[allow(missing_docs)]
-    fn get(&self, _: &mut Request, resp: &mut Response) -> ResourceResult {
-        resp.set_mut(status::Ok);
-        Ok(())
+    fn get(&self, _: &mut Request, _: Response) -> IronResult<Response> {
+        Err(IronError{
+            error: Box::new(ResourceError::NotImplemented),
+            response: Response::with(internal_error("GET not implemented"))})
     }
 
     /// Execute a DELETE request.  Will assert! by default.
-    fn delete(&self, _: &mut Request, _: &mut Response) -> ResourceResult {
-        assert!(false, "not implemented, delete");
-        Err(NotImplemented)
+    fn delete(&self, _: &mut Request, _: Response) -> IronResult<Response> {
+        Err(IronError{
+            error: Box::new(ResourceError::NotImplemented),
+            response: Response::with(internal_error("DELETE not implemented"))})
     }
 
     /// Execute a PATCH request.  Will assert! by default.
-    fn patch(&self, _: &mut Request, _: &mut Response) -> ResourceResult {
-        assert!(false, "not implemented, patch");
-        Err(NotImplemented)
+    fn patch(&self, _: &mut Request, _: Response) -> IronResult<Response> {
+        Err(IronError{
+            error: Box::new(ResourceError::NotImplemented),
+            response: Response::with(internal_error("PATCH not implemented"))})
     }
 
     /// Execute a POST request.  Will assert! by default.
-    fn post(&self, _: &mut Request, _: &mut Response) -> ResourceResult {
-        assert!(false, "not implemented, post");
-        Err(NotImplemented)
+    fn post(&self, _: &mut Request, _: Response) -> IronResult<Response> {
+        Err(IronError{
+            error: Box::new(ResourceError::NotImplemented),
+            response: Response::with(internal_error("POST not implemented"))})
     }
 
     /// Execute a PUT request.  Will assert! by default.
-    fn put(&self, _: &mut Request, _: &mut Response) -> ResourceResult {
+    fn put(&self, _: &mut Request, _: Response) -> IronResult<Response> {
         assert!(false, "not implemented, put");
-        Err(NotImplemented)
+        Err(IronError{
+            error: Box::new(ResourceError::NotImplemented),
+            response: Response::with(internal_error("PUT not implemented"))})
     }
 
 
@@ -525,49 +538,49 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn service_available_decision(&self,
                                   req: &mut Request,
-                                  resp: &mut Response) -> ResourceResult {
+                                  mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, service_available,
                        known_method_decision, handle_service_unavailable)
     }
 
     #[allow(missing_docs)]
     fn known_method_decision(&self, req: &mut Request,
-                             resp: &mut Response) -> ResourceResult {
+                             mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, known_method,
                        uri_too_long_decision, handle_unknown_method)
     }
 
     #[allow(missing_docs)]
     fn uri_too_long_decision(&self, req: &mut Request,
-                             resp: &mut Response) -> ResourceResult {
+                             mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, uri_too_long,
                        handle_uri_too_long, method_allowed_decision)
     }
 
     #[allow(missing_docs)]
     fn method_allowed_decision(&self, req: &mut Request,
-                               resp: &mut Response) -> ResourceResult {
+                               mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, method_allowed,
                        malformed_decision, handle_method_not_allowed)
     }
 
     #[allow(missing_docs)]
     fn malformed_decision(&self, req: &mut Request,
-                          resp: &mut Response) -> ResourceResult {
+                          mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, malformed,
                        handle_malformed, authorized_decision)
     }
 
     #[allow(missing_docs)]
     fn authorized_decision(&self, req: &mut Request,
-                           resp: &mut Response) -> ResourceResult {
+                           mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, authorized,
                        allowed_decision, handle_unauthorized)
     }
 
     #[allow(missing_docs)]
     fn allowed_decision(&self, req: &mut Request,
-                        resp: &mut Response) -> ResourceResult {
+                        mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, allowed,
                        valid_content_header_decision, handle_forbidden)
     }
@@ -575,8 +588,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn valid_content_header_decision(&self,
                                      req: &mut Request,
-                                     resp: &mut Response)
-                                     -> ResourceResult {
+                                     mut resp: Response)
+                                     -> IronResult<Response> {
         decision_body!(self, req, resp, valid_content_header,
                        known_content_type_decision, handle_not_implemented)
     }
@@ -584,8 +597,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn known_content_type_decision(&self,
                                    req: &mut Request,
-                                   resp: &mut Response)
-                                   -> ResourceResult {
+                                   mut resp: Response)
+                                   -> IronResult<Response> {
         decision_body!(self, req, resp, known_content_type,
                        valid_entity_length_decision,
                        handle_unsupported_media_type)
@@ -594,8 +607,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn valid_entity_length_decision(&self,
                                     req: &mut Request,
-                                    resp: &mut Response)
-                                    -> ResourceResult {
+                                    mut resp: Response)
+                                    -> IronResult<Response> {
         decision_body!(self, req, resp, valid_entity_length,
                        is_options_decision,
                        handle_request_entity_too_large)
@@ -603,14 +616,14 @@ pub trait Resource : Sync + Send {
 
     #[allow(missing_docs)]
     fn is_options_decision(&self, req: &mut Request,
-                           resp: &mut Response) -> ResourceResult {
+                           resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, req.method == method::Options,
                        handle_options, accept_exists_decision)
     }
 
     #[allow(missing_docs)]
     fn accept_exists_decision(&self, req: &mut Request,
-                              resp: &mut Response) -> ResourceResult {
+                              mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, accept_exists,
                        media_type_available_decision,
                        accept_language_exists_decision)
@@ -619,8 +632,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn media_type_available_decision(&self,
                                      req: &mut Request,
-                                     resp: &mut Response)
-                                     -> ResourceResult {
+                                     mut resp: Response)
+                                     -> IronResult<Response> {
         decision_body!(self, req, resp, media_type_available,
                        accept_language_exists_decision,
                        handle_not_acceptable)
@@ -629,8 +642,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn accept_language_exists_decision(&self,
                                        req: &mut Request,
-                                       resp: &mut Response)
-                                       -> ResourceResult {
+                                       resp: Response)
+                                       -> IronResult<Response> {
         decision_body!(self, req, resp,
                        header_exists::<hyper_headers::AcceptLanguage>(req),
                        language_available_decision,
@@ -640,8 +653,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn language_available_decision(&self,
                                    req: &mut Request,
-                                   resp: &mut Response)
-                                   -> ResourceResult {
+                                   mut resp: Response)
+                                   -> IronResult<Response> {
         decision_body!(self, req, resp, language_available,
                        accept_charset_exists_decision,
                        handle_not_acceptable)
@@ -650,8 +663,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn accept_charset_exists_decision(&self,
                                       req: &mut Request,
-                                      resp: &mut Response)
-                                      -> ResourceResult {
+                                      resp: Response)
+                                      -> IronResult<Response> {
         decision_body!(self, req, resp,
                        header_exists::<hyper_headers::AcceptCharset>(req),
                        charset_available_decision,
@@ -661,7 +674,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn charset_available_decision(&self,
                                   req: &mut Request,
-                                  resp: &mut Response) -> ResourceResult {
+                                  mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, charset_available,
                        accept_encoding_exists_decision,
                        handle_not_acceptable)
@@ -670,8 +683,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn accept_encoding_exists_decision(&self,
                                        req: &mut Request,
-                                       resp: &mut Response)
-                                       -> ResourceResult {
+                                       resp: Response)
+                                       -> IronResult<Response> {
         decision_body!(self, req, resp,
                        header_exists::<headers::AcceptEncoding>(req),
                        encoding_available_decision,
@@ -681,8 +694,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn encoding_available_decision(&self,
                                    req: &mut Request,
-                                   resp: &mut Response)
-                                   -> ResourceResult {
+                                   mut resp: Response)
+                                   -> IronResult<Response> {
         decision_body!(self, req, resp, encoding_available,
                        processable_decision,
                        handle_not_acceptable)
@@ -691,7 +704,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn processable_decision(&self,
                             req: &mut Request,
-                            resp: &mut Response) -> ResourceResult {
+                            mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, processable,
                        exists_decision,
                        handle_unprocessable_entity)
@@ -700,7 +713,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn exists_decision(&self,
                        req: &mut Request,
-                       resp: &mut Response) -> ResourceResult {
+                       mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, exists,
                        if_match_exists_decision,
                        if_match_star_exists_for_missing_decision)
@@ -709,7 +722,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn if_match_exists_decision(&self,
                                 req: &mut Request,
-                                resp: &mut Response) -> ResourceResult {
+                                resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp,
                        header_exists::<hyper_headers::IfMatch>(req),
                        if_match_star_decision,
@@ -719,7 +732,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn if_match_star_decision(&self,
                               req: &mut Request,
-                              resp: &mut Response) -> ResourceResult {
+                              mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, if_match_star,
                        if_unmodified_since_exists_decision,
                        if_match_decision)
@@ -728,7 +741,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn if_match_decision(&self,
                                           req: &mut Request,
-                                          resp: &mut Response) -> ResourceResult {
+                                          mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, if_match,
                        if_unmodified_since_exists_decision,
                        handle_precondition_failed)
@@ -737,8 +750,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn if_unmodified_since_exists_decision(&self,
                                            req: &mut Request,
-                                           resp: &mut Response)
-                                           -> ResourceResult {
+                                           resp: Response)
+                                           -> IronResult<Response> {
         decision_body!(self, req, resp,
                        header_exists::<headers::IfUnmodifiedSince>(req),
                        if_unmodified_since_decision,
@@ -748,7 +761,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn if_unmodified_since_decision(&self,
                                  req: &mut Request,
-                                 resp: &mut Response) -> ResourceResult {
+                                 mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, unmodified_since,
                        handle_precondition_failed,
                        if_none_match_exists_decision)
@@ -757,8 +770,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn if_none_match_exists_decision(&self,
                                      req: &mut Request,
-                                     resp: &mut Response)
-                                     -> ResourceResult {
+                                     resp: Response)
+                                     -> IronResult<Response> {
         decision_body!(self, req, resp,
                        header_exists::<headers::IfNoneMatch>(req),
                        if_none_match_star_decision,
@@ -766,27 +779,24 @@ pub trait Resource : Sync + Send {
     }
 
     #[allow(missing_docs)]
-    fn if_none_match_star_decision(&self,
-                                   req: &mut Request,
-                                   resp: &mut Response) -> ResourceResult {
+    fn if_none_match_star_decision(&self, req: &mut Request,
+                                   mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, if_none_match_star,
                        if_none_match_decision,
                        none_match_status_decision)
     }
 
     #[allow(missing_docs)]
-    fn if_none_match_decision(&self,
-                        req: &mut Request,
-                        resp: &mut Response) -> ResourceResult {
+    fn if_none_match_decision(&self, req: &mut Request,
+                              mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, if_none_match,
                        none_match_status_decision,
                        if_modified_since_exists_decision)
     }
 
     #[allow(missing_docs)]
-    fn none_match_status_decision(&self,
-                                  req: &mut Request,
-                                  resp: &mut Response) -> ResourceResult {
+    fn none_match_status_decision(&self, req: &mut Request,
+                                  resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp,
                        req.method == method::Get || req.method == method::Head,
                        handle_not_modified,
@@ -794,10 +804,9 @@ pub trait Resource : Sync + Send {
     }
 
     #[allow(missing_docs)]
-    fn if_modified_since_exists_decision(&self,
-                                         req: &mut Request,
-                                         resp: &mut Response)
-                                         -> ResourceResult {
+    fn if_modified_since_exists_decision(&self, req: &mut Request,
+                                         resp: Response)
+                                         -> IronResult<Response> {
         decision_body!(self, req, resp,
                        header_exists::<headers::IfModifiedSince>(req),
                        if_modified_since_decision,
@@ -805,45 +814,40 @@ pub trait Resource : Sync + Send {
     }
 
     #[allow(missing_docs)]
-    fn if_modified_since_decision(&self,
-                                  req: &mut Request,
-                                  resp: &mut Response) -> ResourceResult {
+    fn if_modified_since_decision(&self, req: &mut Request,
+                                  mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, modified_since,
                        method_delete_decision,
                        handle_not_modified)
     }
 
     #[allow(missing_docs)]
-    fn method_delete_decision(&self,
-                                req: &mut Request,
-                                resp: &mut Response) -> ResourceResult {
+    fn method_delete_decision(&self, req: &mut Request,
+                              resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, req.method == method::Delete,
                        delete,
                        method_patch_decision)
     }
 
     #[allow(missing_docs)]
-    fn method_patch_decision(&self,
-                                req: &mut Request,
-                                resp: &mut Response) -> ResourceResult {
+    fn method_patch_decision(&self, req: &mut Request,
+                             resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, req.method == method::Patch,
                        patch,
                        post_to_existing_decision)
     }
 
     #[allow(missing_docs)]
-    fn post_to_existing_decision(&self,
-                                 req: &mut Request,
-                                 resp: &mut Response) -> ResourceResult {
+    fn post_to_existing_decision(&self, req: &mut Request,
+                                 resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, req.method == method::Post,
                        post,
                        put_to_existing_decision)
     }
 
     #[allow(missing_docs)]
-    fn put_to_existing_decision(&self,
-                                req: &mut Request,
-                                resp: &mut Response) -> ResourceResult {
+    fn put_to_existing_decision(&self, req: &mut Request,
+                                resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, req.method == method::Put,
                        conflict_decision,
                        multiple_representations_decision)
@@ -852,16 +856,15 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn if_match_star_exists_for_missing_decision(&self,
                                                  req: &mut Request,
-                                                 resp: &mut Response) -> ResourceResult {
+                                                 mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, if_match_star_exists_for_missing,
                        handle_precondition_failed,
                        method_put_decision)
     }
 
     #[allow(missing_docs)]
-    fn method_put_decision(&self,
-                           req: &mut Request,
-                           resp: &mut Response) -> ResourceResult {
+    fn method_put_decision(&self, req: &mut Request,
+                           resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, req.method == method::Put,
                        put_to_different_url_decision,
                        existed_decision)
@@ -870,7 +873,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn put_to_different_url_decision(&self,
                                      req: &mut Request,
-                                     resp: &mut Response) -> ResourceResult {
+                                     mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, put_to_different_url,
                        handle_moved_permanently,
                        can_put_to_missing_decision)
@@ -879,7 +882,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn can_put_to_missing_decision(&self,
                                  req: &mut Request,
-                                 resp: &mut Response) -> ResourceResult {
+                                 mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, can_put_to_missing,
                        conflict_decision,
                        handle_not_implemented)
@@ -888,7 +891,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn conflict_decision(&self,
                          req: &mut Request,
-                         resp: &mut Response) -> ResourceResult {
+                         mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, conflict,
                        handle_conflict,
                        put)
@@ -897,7 +900,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn existed_decision(&self,
                                  req: &mut Request,
-                                 resp: &mut Response) -> ResourceResult {
+                                 mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, existed,
                        moved_permanently_decision,
                        post_to_missing_decision)
@@ -906,7 +909,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn moved_permanently_decision(&self,
                                   req: &mut Request,
-                                  resp: &mut Response) -> ResourceResult {
+                                  mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, moved_permanently,
                        handle_moved_permanently,
                        moved_temporarily_decision)
@@ -915,34 +918,31 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn moved_temporarily_decision(&self,
                                   req: &mut Request,
-                                  resp: &mut Response) -> ResourceResult {
+                                  mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, moved_temporarily,
                        handle_moved_temporarily,
                        post_to_gone_decision)
     }
 
     #[allow(missing_docs)]
-    fn post_to_gone_decision(&self,
-                                  req: &mut Request,
-                                  resp: &mut Response) -> ResourceResult {
+    fn post_to_gone_decision(&self, req: &mut Request,
+                             resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, req.method == method::Post,
                        can_post_to_gone_decision,
                        handle_gone)
     }
 
     #[allow(missing_docs)]
-    fn can_post_to_gone_decision(&self,
-                                 req: &mut Request,
-                                 resp: &mut Response) -> ResourceResult {
+    fn can_post_to_gone_decision(&self, req: &mut Request,
+                                 mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, can_post_to_gone,
                        post,
                        handle_gone)
     }
 
     #[allow(missing_docs)]
-    fn post_to_missing_decision(&self,
-                                req: &mut Request,
-                                resp: &mut Response) -> ResourceResult {
+    fn post_to_missing_decision(&self, req: &mut Request,
+                                resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, req.method == method::Post,
                        can_post_to_missing_decision,
                        handle_not_found)
@@ -951,7 +951,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn can_post_to_missing_decision(&self,
                                     req: &mut Request,
-                                    resp: &mut Response) -> ResourceResult {
+                                    mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, can_post_to_missing,
                        post,
                        handle_not_found)
@@ -960,7 +960,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn post_redirect_decision(&self,
                               req: &mut Request,
-                              resp: &mut Response) -> ResourceResult {
+                              mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, post_redirect,
                        handle_see_other,
                        new_decision)
@@ -969,7 +969,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn new_decision(&self,
                     req: &mut Request,
-                    resp: &mut Response) -> ResourceResult {
+                    mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, new,
                        handle_created,
                        respond_with_entity_decision)
@@ -978,7 +978,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn respond_with_entity_decision(&self,
                                     req: &mut Request,
-                                    resp: &mut Response) -> ResourceResult {
+                                    mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, respond_with_entity,
                        multiple_representations_decision,
                        handle_no_content)
@@ -987,7 +987,7 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn multiple_representations_decision(&self,
                                     req: &mut Request,
-                                    resp: &mut Response) -> ResourceResult {
+                                    mut resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp, multiple_representations,
                        handle_multiple_representations,
                        get)
@@ -997,177 +997,175 @@ pub trait Resource : Sync + Send {
 
     #[allow(missing_docs)]
     fn handle_service_unavailable(&self, _: &mut Request,
-                                  resp: &mut Response) -> ResourceResult {
+                                  mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::ServiceUnavailable, "Service unavailable"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_unknown_method(&self, _: &mut Request,
-                             resp: &mut Response) -> ResourceResult {
+                             mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::NotImplemented, "Unknown method"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_uri_too_long(&self, _: &mut Request,
-                           resp: &mut Response) -> ResourceResult {
+                           mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::NotImplemented, "Request URI too long"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_method_not_allowed(&self, _: &mut Request,
-                                 resp: &mut Response) -> ResourceResult {
+                                 mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::MethodNotAllowed, "Method not allowed"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_malformed(&self, _: &mut Request,
-                        resp: &mut Response) -> ResourceResult {
+                        mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::BadRequest, "Bad request"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_unauthorized(&self, _: &mut Request,
-                           resp: &mut Response) -> ResourceResult {
+                           mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::Unauthorized, "Unauthorized"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_forbidden(&self, _: &mut Request,
-                        resp: &mut Response) -> ResourceResult {
+                        mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::Forbidden, "Forbidden"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_not_implemented(&self, _: &mut Request,
-                              resp: &mut Response) -> ResourceResult {
+                              mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::NotImplemented, "Not implemented"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_unsupported_media_type(&self, _: &mut Request,
-                                     resp: &mut Response) -> ResourceResult {
+                                     mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::UnsupportedMediaType, "Unsupported media type"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_request_entity_too_large(&self, _: &mut Request,
-                                       resp: &mut Response) -> ResourceResult {
+                                       mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::RequestEntityTooLarge,
                       "Request entity too large"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_not_acceptable(&self, _: &mut Request,
-                             resp: &mut Response) -> ResourceResult {
+                             mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::NotAcceptable, "Not Acceptable"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_unprocessable_entity(&self, _: &mut Request,
-                                   resp: &mut Response) -> ResourceResult {
+                                   mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::UnprocessableEntity, "Unprocessable entity"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_conflict(&self, _: &mut Request,
-                       resp: &mut Response) -> ResourceResult {
+                       mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::Conflict, "Conflict"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_see_other(&self, _: &mut Request,
-                        resp: &mut Response) -> ResourceResult {
+                        mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::SeeOther, "Conflict"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_created(&self, _: &mut Request,
-                      resp: &mut Response) -> ResourceResult {
+                      mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::Created, "Created"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_precondition_failed(&self, _: &mut Request,
-                                  resp: &mut Response) -> ResourceResult {
+                                  mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::PreconditionFailed, "Precondition failed"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_not_modified(&self, _: &mut Request,
-                           resp: &mut Response) -> ResourceResult {
+                           mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::NotModified, "Not modified"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_moved_permanently(&self, _: &mut Request,
-                                resp: &mut Response) -> ResourceResult {
+                                mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::PermanentRedirect, "Permanent redirect"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_moved_temporarily(&self, _: &mut Request,
-                                resp: &mut Response) -> ResourceResult {
+                                mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::TemporaryRedirect, "Temporary redirect"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
-    fn handle_gone(&self, _: &mut Request, resp: &mut Response) -> ResourceResult {
+    fn handle_gone(&self, _: &mut Request, mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::Gone, "Gone"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_not_found(&self, _: &mut Request,
-                        resp: &mut Response) -> ResourceResult {
+                        mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::NotFound, "Not found"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_no_content(&self, _: &mut Request,
-                         resp: &mut Response) -> ResourceResult {
+                         mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::NoContent, "No content"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_multiple_representations(&self, _: &mut Request,
-                                       resp: &mut Response) -> ResourceResult {
+                                       mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::MultipleChoices, "Multiple Choices"));
-        Ok(())
+        Ok(resp)
     }
 
     #[allow(missing_docs)]
     fn handle_options(&self, _: &mut Request,
-                      resp: &mut Response) -> ResourceResult {
+                      mut resp: Response) -> IronResult<Response> {
         resp.set_mut((status::Ok, ""));
-        Ok(())
+        Ok(resp)
     }
 
     /// Iron handler function
     fn resource_handle(&self, req: &mut Request) -> IronResult<Response> {
-        let mut resp = Response::new();
-        try!(self.service_available_decision(req, &mut resp));
-        Ok(resp)
+        self.service_available_decision(req, Response::new())
     }
 }
 
@@ -1190,7 +1188,6 @@ pub macro_rules! resource_handler {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::{Arc,Mutex};
     use hyper::{self, IpAddr};
     use hyper::server::Listening;
     use iron::{Handler, Iron, IronResult, Request, Response, status};
@@ -1200,39 +1197,37 @@ mod tests {
 
     fn http_server<T>(resource: T) -> HttpResult<Listening> where T: Resource+Handler+Sync+Send {
         let address = IpAddr::Ipv4Addr(127,0,0,1);
-        let count = Arc::new(Mutex::new(0u8));
-        let server_count = count.clone();
         Iron::new(resource).listen((address,0u16))
     }
 
-    struct GetOk;
-    impl Resource for GetOk {}
-    resource_handler!(GetOk);
-    // resource!(GetOk);
+    // struct GetOk;
+    // impl Resource for GetOk {}
+    // resource_handler!(GetOk);
+    // // resource!(GetOk);
 
-    #[test]
-    fn test_get_ok() {
-      let mut listen = http_server(GetOk).unwrap();
-      let mut client = hyper::Client::new();
-       match client.get(&format!("http://127.0.0.1:{}", listen.socket.port)[])
-          .send() {
-              Ok(ref mut r) => {
-                  assert_eq!("", r.read_to_string().unwrap());
-                  assert_eq!(status::Ok, r.status);
-              },
-              Err(x) => assert!(false, "get failed")
-          };
-       listen.close().unwrap();
-    }
+    // #[test]
+    // fn test_get_ok() {
+    //   let mut listen = http_server(GetOk).unwrap();
+    //   let mut client = hyper::Client::new();
+    //    match client.get(&format!("http://127.0.0.1:{}", listen.socket.port)[])
+    //       .send() {
+    //           Ok(ref mut r) => {
+    //               assert_eq!("", r.read_to_string().unwrap());
+    //               assert_eq!(status::Ok, r.status);
+    //           },
+    //           Err(x) => assert!(false, "get failed")
+    //       };
+    //    listen.close().unwrap();
+    // }
 
 
     struct GetOkContent;
     resource_handler!(GetOkContent);
 
     impl Resource for GetOkContent {
-        fn get(&self, req: &mut Request, resp: &mut Response) -> ResourceResult {
+        fn get(&self, _: &mut Request, mut resp: Response) -> IronResult<Response> {
             resp.set_mut((status::Ok, "hello"));
-            Ok(())
+            Ok(resp)
         }
     }
 
@@ -1246,7 +1241,7 @@ mod tests {
                   assert_eq!("hello", r.read_to_string().unwrap());
                   assert_eq!(status::Ok, r.status);
               },
-              Err(x) => assert!(false, "get failed")
+              Err(_) => assert!(false, "get failed")
           };
        listen.close().unwrap();
     }

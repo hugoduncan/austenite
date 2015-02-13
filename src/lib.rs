@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #![deny(missing_docs)]
-#![feature(collections, core)]
+#![feature(collections, core, io)]
 
 //! Austenite
 //!
