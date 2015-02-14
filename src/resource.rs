@@ -199,7 +199,7 @@ pub trait Resource : Sync + Send {
     }
 
     /// Override to control content length validity.  If this returns
-    /// false, then a 413 RequestEntityTooLarge reply will result.
+    /// false, then a 413 PayloadTooLarge reply will result.
     /// Defaults to true.
     fn valid_entity_length(&self, _: &mut Request, _: &mut Response) -> bool {
         true
@@ -601,7 +601,7 @@ pub trait Resource : Sync + Send {
                                     -> IronResult<Response> {
         decision_body!(self, req, resp, valid_entity_length,
                        is_options_decision,
-                       handle_request_entity_too_large)
+                       handle_payload_too_large)
     }
 
     #[allow(missing_docs)]
@@ -1049,10 +1049,10 @@ pub trait Resource : Sync + Send {
     }
 
     #[allow(missing_docs)]
-    fn handle_request_entity_too_large(&self, _: &mut Request,
-                                       mut resp: Response) -> IronResult<Response> {
-        resp.set_mut((status::RequestEntityTooLarge,
-                      "Request entity too large"));
+    fn handle_payload_too_large(&self, _: &mut Request,
+                                mut resp: Response) -> IronResult<Response> {
+        resp.set_mut((status::PayloadTooLarge,
+                      "Payload too large"));
         Ok(resp)
     }
 
