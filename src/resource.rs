@@ -51,17 +51,18 @@ impl error::Error for ResourceError {
 
 impl error::FromError<ResourceError> for IronError {
     fn from_error(err: ResourceError) -> IronError {
-        IronError{
-            error: Box::new(err),
-            response: Response::with(
-                (status::NotImplemented, "Not implemented"))
-        }}
+        IronError::new(err,(status::NotImplemented, "Not implemented"))
+    }
 }
 
 fn internal_error(s: &str) -> (status::Status, Mime, String) {
     (status::InternalServerError,
      Mime(TopLevel::Text, SubLevel::Plain, vec![]),
      s.to_string())
+}
+
+fn not_implemented(s: &str) -> IronError {
+    IronError::new(ResourceError::NotImplemented, internal_error(s))
 }
 
 /// Result type for resource trait functions.
@@ -313,38 +314,27 @@ pub trait Resource : Sync + Send {
 
     #[allow(missing_docs)]
     fn get(&self, _: &mut Request, _: Response) -> IronResult<Response> {
-        Err(IronError{
-            error: Box::new(ResourceError::NotImplemented),
-            response: Response::with(internal_error("GET not implemented"))})
+        Err(not_implemented("GET not implemented"))
     }
 
     /// Execute a DELETE request.  Will assert! by default.
     fn delete(&self, _: &mut Request, _: Response) -> IronResult<Response> {
-        Err(IronError{
-            error: Box::new(ResourceError::NotImplemented),
-            response: Response::with(internal_error("DELETE not implemented"))})
+        Err(not_implemented("DELETE not implemented"))
     }
 
     /// Execute a PATCH request.  Will assert! by default.
     fn patch(&self, _: &mut Request, _: Response) -> IronResult<Response> {
-        Err(IronError{
-            error: Box::new(ResourceError::NotImplemented),
-            response: Response::with(internal_error("PATCH not implemented"))})
+        Err(not_implemented("PATCH not implemented"))
     }
 
     /// Execute a POST request.  Will assert! by default.
     fn post(&self, _: &mut Request, _: Response) -> IronResult<Response> {
-        Err(IronError{
-            error: Box::new(ResourceError::NotImplemented),
-            response: Response::with(internal_error("POST not implemented"))})
+        Err(not_implemented("POST not implemented"))
     }
 
     /// Execute a PUT request.  Will assert! by default.
     fn put(&self, _: &mut Request, _: Response) -> IronResult<Response> {
-        assert!(false, "not implemented, put");
-        Err(IronError{
-            error: Box::new(ResourceError::NotImplemented),
-            response: Response::with(internal_error("PUT not implemented"))})
+        Err(not_implemented("PUT not implemented"))
     }
 
 
