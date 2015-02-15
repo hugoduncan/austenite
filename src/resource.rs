@@ -14,7 +14,6 @@
 
 /// A module for http resources
 use std::{error,fmt};
-use std::boxed::Box;
 
 use hyper::header::EntityTag;
 use iron::{IronError, IronResult, Request, Response, status};
@@ -408,7 +407,7 @@ pub trait Resource : Sync + Send {
 
     #[allow(missing_docs)]
     fn language_available(&self, req: &mut Request, resp: &mut Response) -> bool {
-        match req.headers.get::<hyper_headers::AcceptLanguage>() {
+        match req.headers.get::<headers::AcceptLanguage>() {
             Some(_) => match content_neg::best_language(
                 vec![QualityItem::<String>{
                     item: "*".to_string(),
@@ -474,9 +473,8 @@ pub trait Resource : Sync + Send {
 
     #[allow(missing_docs)]
     fn if_match_star(&self, req: &mut Request, _: &mut Response) -> bool {
-        match req.headers.get::<hyper_headers::IfMatch>() {
-            Some(&hyper_headers::IfMatch(hyper_headers::EntityTagMatch::Star)) =>
-                true,
+        match req.headers.get::<headers::IfMatch>() {
+            Some(&headers::IfMatch::Any) => true,
             _ => false
         }
     }
@@ -518,8 +516,8 @@ pub trait Resource : Sync + Send {
     #[allow(missing_docs)]
     fn if_match_star_exists_for_missing(&self, req: &mut Request,
                                         _: &mut Response) -> bool {
-        match req.headers.get::<hyper_headers::IfMatch>() {
-            Some(&hyper_headers::IfMatch(hyper_headers::EntityTagMatch::Star)) => true,
+        match req.headers.get::<headers::IfMatch>() {
+            Some(&headers::IfMatch::Any) => true,
             _ => false
         }
     }
@@ -635,7 +633,7 @@ pub trait Resource : Sync + Send {
                                        resp: Response)
                                        -> IronResult<Response> {
         decision_body!(self, req, resp,
-                       header_exists::<hyper_headers::AcceptLanguage>(req),
+                       header_exists::<headers::AcceptLanguage>(req),
                        language_available_decision,
                        accept_charset_exists_decision)
                                        }
@@ -714,7 +712,7 @@ pub trait Resource : Sync + Send {
                                 req: &mut Request,
                                 resp: Response) -> IronResult<Response> {
         decision_body!(self, req, resp,
-                       header_exists::<hyper_headers::IfMatch>(req),
+                       header_exists::<headers::IfMatch>(req),
                        if_match_star_decision,
                        if_unmodified_since_exists_decision)
     }
